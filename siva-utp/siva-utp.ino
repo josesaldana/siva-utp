@@ -7,8 +7,7 @@
 #include "Admin.h"
 #include "Voting.h"
 
-void setup()
-{
+void setup() {
   Serial.begin(9600);
 }
 
@@ -34,4 +33,6 @@ void loop()
   //  4. On Voting Session Completion:
   //    4.1 Print Session status report (votes report)
 }
+
+
 
