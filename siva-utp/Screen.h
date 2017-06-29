@@ -4,7 +4,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 
-const int CONTRAST_1        = 60;
+const int CONTRAST_1        = 50;
 const int CONTRAST_2        = 0; // CREANDO VARIABLE DE CONTRASTE
 
 class ScreenUtils {
@@ -18,13 +18,13 @@ class ScreenUtils {
       display.display();   //DESPLEGAR PANTALLA (ACTUALIZAR)
     }
 
-    static void displayText(char* text, Adafruit_PCD8544 display) { 
-      Serial.println("Display text");
+    static void displayText(char* text, Adafruit_PCD8544 display) {
+      display.setContrast(CONTRAST_1); // COLOCAR VALOR AL CONTRASTE 
       digitalWrite(7, LOW);
-      display.setTextSize(7);
+      display.setTextSize(1);
       display.clearDisplay();
       display.setTextColor(BLACK, WHITE);
-      display.setCursor(30, 0);
+      display.setCursor(0, 0);
       display.print(text); 
       display.display();
     }

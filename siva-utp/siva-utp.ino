@@ -5,7 +5,6 @@
  */
 #include "Arduino.h"
 #include "Admin.h"
-//#include "Voting.h"
 
 const unsigned int IN_CONFIGURATION = 1;
 const unsigned int IN_SESSION_CLOSING = 3;
@@ -14,14 +13,25 @@ unsigned int current_state = 1;
 
 Admin admin;
 
+#include <Adafruit_GFX.h>
+#include <Adafruit_PCD8544.h>
+
+Adafruit_PCD8544 DISPLAY_A = Adafruit_PCD8544(5, 4, 3);
+//Adafruit_PCD8544 DISPLAY_V = Adafruit_PCD8544(5, 4, 3);
+
 void setup() {
   Serial.begin(9600);
+
+  // Inicializando pantallas
+  ScreenUtils::configDisplay(DISPLAY_A);
+//  ScreenUtils::configDisplay(DISPLAY_V);
+  
   admin = new Admin();
-//  Printer.initPrinter();
 }
 
 void loop()
 {
+  
   // -----------
   // Device flow:
   // -----------
@@ -52,7 +62,6 @@ void loop()
       break;
     }
   }
-  
 }
 
 

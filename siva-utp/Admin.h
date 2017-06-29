@@ -25,12 +25,12 @@ class Admin {
 };
 
 Admin::Admin() {
-  ScreenUtils::configDisplay(DISPLAY_A);
+// ScreenUtils::configDisplay(DISPLAY_A);
 }
 
 void Admin::configurarSesion() {
   while(IN_CONFIG_MODE) {
-    ScreenUtils::displayText("== Selección de Nóminas ==", DISPLAY_A);
+    ScreenUtils::displayText("Nom", DISPLAY_A);
 //    ScreenUtils::displayText("[1] [2] [3] [4]", DISPLAY_A);
 //    ScreenUtils::displayText("[5] [6] [7] [8]", DISPLAY_A);
 //    ScreenUtils::displayText("[9]", DISPLAY_A);
