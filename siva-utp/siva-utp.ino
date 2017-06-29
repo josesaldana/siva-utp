@@ -5,10 +5,19 @@
  */
 #include "Arduino.h"
 #include "Admin.h"
-#include "Voting.h"
+//#include "Voting.h"
+
+const unsigned int IN_CONFIGURATION = 1;
+const unsigned int IN_SESSION_CLOSING = 3;
+
+unsigned int current_state = 1;
+
+Admin admin;
 
 void setup() {
   Serial.begin(9600);
+  admin = new Admin();
+//  Printer.initPrinter();
 }
 
 void loop()
@@ -32,6 +41,18 @@ void loop()
 
   //  4. On Voting Session Completion:
   //    4.1 Print Session status report (votes report)
+
+  switch(current_state) {
+    case IN_CONFIGURATION: {
+      admin.configurarSesion();
+      break;
+    }
+    case IN_SESSION_CLOSING: {
+      admin.cerrarSesion();
+      break;
+    }
+  }
+  
 }
 
 
