@@ -5,26 +5,28 @@
 #include <Adafruit_PCD8544.h>
 
 const int CONTRAST_1        = 50;
-const int CONTRAST_2        = 0; // CREANDO VARIABLE DE CONTRASTE
+
+enum VerticalTextPosition { LEFT, CENTER, RIGHT };
 
 class ScreenUtils {
   public:
     static configDisplay(Adafruit_PCD8544 display) {
       pinMode(7,OUTPUT);
-      digitalWrite(7, LOW); // PUERTO 7 ES EL DE LA LUZ SE PUEDE ENCENDER Y APAGAR (LOW, HIGH)
-      display.begin(); //INICIAR PANTALLA    
-      display.setContrast(CONTRAST_1); // COLOCAR VALOR AL CONTRASTE
-      display.clearDisplay(); // LIMPIAR PANTALLA
-      display.display();   //DESPLEGAR PANTALLA (ACTUALIZAR)
+      digitalWrite(7, LOW); 
+      display.begin();   
+      display.setContrast(CONTRAST_1); 
+      display.clearDisplay(); 
+      display.display();   
     }
 
-    static void displayText(char* text, Adafruit_PCD8544 display) {
-      display.setContrast(CONTRAST_1); // COLOCAR VALOR AL CONTRASTE 
-      digitalWrite(7, LOW);
-      display.setTextSize(1);
-      display.clearDisplay();
-      display.setTextColor(BLACK, WHITE);
-      display.setCursor(0, 0);
+    static void displayText(char* text, Adafruit_PCD8544 display, int textSize, int xPosition = 0, int yPosition = 0, bool isSelected = false) {
+      display.setTextSize(textSize);
+      if(isSelected) {
+        display.setTextColor(WHITE, BLACK);
+      } else {
+        display.setTextColor(BLACK, WHITE);  
+      }
+      display.setCursor(xPosition, yPosition);
       display.print(text); 
       display.display();
     }

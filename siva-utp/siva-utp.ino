@@ -16,16 +16,13 @@ Admin admin;
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 
-Adafruit_PCD8544 DISPLAY_A = Adafruit_PCD8544(5, 4, 3);
-//Adafruit_PCD8544 DISPLAY_V = Adafruit_PCD8544(5, 4, 3);
-
 void setup() {
   Serial.begin(9600);
 
   // Inicializando pantallas
-  ScreenUtils::configDisplay(DISPLAY_A);
-//  ScreenUtils::configDisplay(DISPLAY_V);
-  
+  ScreenUtils::configDisplay(Adafruit_PCD8544(5, 4, 3));
+
+  // Manejador de Tareas de Administración
   admin = new Admin();
 }
 
@@ -62,6 +59,8 @@ void loop()
       break;
     }
   }
+
+  delay(100);
 }
 
 
