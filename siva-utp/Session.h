@@ -1,23 +1,32 @@
 #ifndef SESSION_H
 #define SESSION_H
 
+#include <ArduinoSTL.h>
+
+using namespace std;
+
 class Session {
   public:
     bool votar(int nomina);
-    void agregarNomina(int nomina);
+    vector<int> votos();
     
-    static Session* get(void) {
-      if(instance == NULL)
-        instance = new Session();
+    static Session* initializeOrGet(int maxNominas = NULL) {
+      if(instance == NULL) {
+        if(maxNominas != NULL && maxNominas > 0) {
+          instance = new Session(maxNominas);
+        } else return NULL; // Exception: No puede inicializar sesión sin nóminas
+      }
     
       return instance;
     }
 
   private:
-    int votes[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-    int invalid_parties[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    vector<int> votes;
     
-    Session() {};
+    Session(int maxNominas) { 
+      votes.reserve(maxNominas); 
+    };
+    
     Session(Session const&){};             // copy constructor is private
     Session& operator=(Session const&){};  // assignment operator is private
     static Session* instance;
@@ -26,14 +35,14 @@ class Session {
 Session* Session::instance = NULL;
 
 bool Session::votar(int nomina) {
-  if(invalid_parties[nomina] == 0) {
+  if(nomina >= 0 && nomina < votes.size()) {
     votes[nomina] = votes[nomina] + 1;
     return true;
   } else return false;
 }
 
-void Session::agregarNomina(int nomina) {
-  invalid_parties[nomina] = 0;
+std::vector<int> Session::votos() {
+  return votes;
 }
 
 #endif //SESSION_H
