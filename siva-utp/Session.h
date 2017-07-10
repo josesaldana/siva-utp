@@ -14,7 +14,9 @@ class Session {
       if(instance == NULL) {
         if(maxNominas != NULL && maxNominas > 0) {
           instance = new Session(maxNominas);
-        } else return NULL; // Exception: No puede inicializar sesión sin nóminas
+        } else {
+          return NULL; // TODO: Exception handling: No puede inicializar sesión sin nóminas
+        }
       }
     
       return instance;
@@ -24,7 +26,9 @@ class Session {
     vector<int> votes;
     
     Session(int maxNominas) { 
-      votes.reserve(maxNominas); 
+      // Inicializa el vector con cantidad maxima de
+      // nóminas, cada una con cero (0) número de votos.
+      votes = vector<int>(maxNominas, 0);
     };
     
     Session(Session const&){};             // copy constructor is private
