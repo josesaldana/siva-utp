@@ -5,14 +5,30 @@
  */
 #include "Arduino.h"
 #include "Admin.h"
-#include "Voting.h"
+#include <Adafruit_GFX.h>
+#include <Adafruit_PCD8544.h>
+
+enum States { 
+  IN_CONFIGURATION = 1, 
+  IN_SESSION = 2, 
+  IN_SESSION_CLOSING = 3 
+};
+
+States CURRENT_STATE = States::IN_CONFIGURATION;
+
+const Admin admin;
 
 void setup() {
   Serial.begin(9600);
+
+  // Inicializando pantallas
+  ScreenUtils::configureDisplay(Adafruit_PCD8544(5, 4, 3));
+
+  // Manejador de Tareas de Administración
+  admin = new Admin();
 }
 
-void loop()
-{
+void loop() {  
   // -----------
   // Device flow:
   // -----------
@@ -32,6 +48,24 @@ void loop()
 
   //  4. On Voting Session Completion:
   //    4.1 Print Session status report (votes report)
+
+  switch(CURRENT_STATE) {
+    case States::IN_CONFIGURATION: {
+      admin.configurarSesion();
+      break;
+    }
+    case States::IN_SESSION: {
+      printf("In session");
+      break;
+    }
+    case States::IN_SESSION_CLOSING: {
+      admin.cerrarSesion();
+      break;
+    }
+    default: printf("Ha ocurrido un error"); // Beep!
+  }
+
+  delay(100);
 }
 
 
