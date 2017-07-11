@@ -4,25 +4,32 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 
-const int CONTRAST_1        = 60;
-const int CONTRAST_2        = 0; // CREANDO VARIABLE DE CONTRASTE
+const int CONTRAST_1        = 50;
 
 class ScreenUtils {
   public:
-    static configDisplay(Adafruit_PCD8544 display) {
-      pinMode(7,OUTPUT);
-      
-      digitalWrite(7,LOW); // PUERTO 7 ES EL DE LA LUZ SE PUEDE ENCENDER Y APAGAR (LOW, HIGH)
-
-      // Display for Voting
-      display.begin(); //INICIAR PANTALLA     
-      display.setContrast(CONTRAST_1); // COLOCAR VALOR AL CONTRASTE
-      display.clearDisplay(); // LIMPIAR PANTALLA
-      display.display();   //DESPLEGAR PANTALLA (ACTUALIZAR)
+    static configureDisplay(Adafruit_PCD8544 display) {
+      display.begin();   
+      display.setContrast(CONTRAST_1); 
+      display.clearDisplay(); 
+      display.display();   
     }
 
-    static void displayText(char* text, Adafruit_PCD8544 display) { 
-      display.clearDisplay();  
+    static void displayText(char* text, 
+        Adafruit_PCD8544 display, 
+        int textSize, 
+        int xPosition = 0, 
+        int yPosition = 0, 
+        bool isSelected = false) {
+      if(isSelected) display.setTextColor(WHITE, BLACK);
+      else display.setTextColor(BLACK, WHITE);  
+      
+      display.setTextSize(textSize);
+      display.setCursor(xPosition, yPosition);
+      display.print(text); 
+      display.display();
+      
+      delay (30);
     }
 };
 
