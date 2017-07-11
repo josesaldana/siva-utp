@@ -4,11 +4,11 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 
-const int CONTRAST_1        = 50;
+const int CONTRAST_1        = 60;
 
 class ScreenUtils {
   public:
-    static configureDisplay(Adafruit_PCD8544 display) {
+    static void configureDisplay(const Adafruit_PCD8544& display) {
       display.begin();   
       display.setContrast(CONTRAST_1); 
       display.clearDisplay(); 
@@ -16,7 +16,7 @@ class ScreenUtils {
     }
 
     static void displayText(char* text, 
-        Adafruit_PCD8544 display, 
+        const Adafruit_PCD8544 display, 
         int textSize, 
         int xPosition = 0, 
         int yPosition = 0, 

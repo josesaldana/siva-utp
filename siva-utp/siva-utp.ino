@@ -22,12 +22,15 @@ States CURRENT_STATE = States::IN_CONFIGURATION;
 const Admin manejadorDeAdministracion;
 const ManejadorDeVotacion manejadorDeVotacion;
 
+const Adafruit_PCD8544 ADMIN_DISPLAY = Adafruit_PCD8544(12, 32, 30, 5, 28);
+const Adafruit_PCD8544 VOTING_DISPLAY = Adafruit_PCD8544(13, 26, 24, 4,22);
+
 void setup() {
   Serial.begin(9600);
 
   // Inicializando pantallas
-  ScreenUtils::configureDisplay(Adafruit_PCD8544(12, 32, 30, 5, 28)); // Administración
-  ScreenUtils::configureDisplay(Adafruit_PCD8544(13, 26, 24, 4,22));  // Votación
+  ScreenUtils::configureDisplay(ADMIN_DISPLAY); // Administración
+  ScreenUtils::configureDisplay(VOTING_DISPLAY);  // Votación
 
   // Manejador de Tareas de Administración
   manejadorDeAdministracion = new Admin();
@@ -38,6 +41,13 @@ void setup() {
 }
 
 void loop() {  
+  // Workaround tentativo para visualizar texto en las pantallas
+  ADMIN_DISPLAY.print("");
+  ADMIN_DISPLAY.display();
+
+  VOTING_DISPLAY.print("");
+  VOTING_DISPLAY.display();
+  
   // -----------
   // Device flow:
   // -----------

@@ -22,7 +22,7 @@ class ManejadorDeVotacion {
     
   private:
     // Acceso a pantalla
-    Adafruit_PCD8544 display = Adafruit_PCD8544(13, 26, 24, 4,22); 
+    const Adafruit_PCD8544 display = Adafruit_PCD8544(13, 26, 24, 4,22); 
     
     boolean  voto = false;
     boolean access = false;

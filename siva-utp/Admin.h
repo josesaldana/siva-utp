@@ -58,7 +58,7 @@ class Admin {
     const unsigned int TEMPORIZADOR_DE_SELECCION = 5000;
 
     // Referencia interna a pantalla
-    Adafruit_PCD8544 display = Adafruit_PCD8544(12, 32, 30, 5, 28); 
+    const Adafruit_PCD8544 display = Adafruit_PCD8544(12, 32, 30, 5, 28); 
 
     // Estado actual en flujo de administración
     AdminState CURRENT_STATE = AdminState::PARTIES_SELECTION;
@@ -138,7 +138,7 @@ void Admin::impresionDeReporte() {
 
   //TODO: Imprimir reporte
 
-  delay(1000);
+  delay(3000);
 }
 
 void Admin::cerrarSesion() {
