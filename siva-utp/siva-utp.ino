@@ -8,6 +8,16 @@
 #include "Voting.h"
 #include "Screen.h"
 
+const unsigned int IN_CONFIGURATION = 1;
+const unsigned int IN_SESSION_CLOSING = 3;
+
+unsigned int current_state = 1;
+
+Admin admin;
+
+#include <Adafruit_GFX.h>
+#include <Adafruit_PCD8544.h>
+
 void setup() {
   Serial.begin(9600);
 
@@ -16,6 +26,7 @@ void setup() {
 
 void loop()
 {
+  
   // -----------
   // Device flow:
   // -----------
@@ -35,6 +46,19 @@ void loop()
 
   //  4. On Voting Session Completion:
   //    4.1 Print Session status report (votes report)
+
+  switch(current_state) {
+    case IN_CONFIGURATION: {
+      admin.configurarSesion();
+      break;
+    }
+    case IN_SESSION_CLOSING: {
+      admin.cerrarSesion();
+      break;
+    }
+  }
+
+  delay(100);
 }
 
 
