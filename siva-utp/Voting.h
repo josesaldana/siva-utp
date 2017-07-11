@@ -3,6 +3,7 @@
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
+#include "Screen.h"
 #include "RFID.h"
 
 class ManejadorDeVotacion {
