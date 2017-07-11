@@ -91,14 +91,16 @@ void ManejadorDeVotacion::dibujar() {
     
     display.clearDisplay();
     display.setContrast(SCREEN_CONTRAST);
-    display.setTextSize(1);
-    display.setCursor(1, 40);
-    display.print(cont2);
-    display.setTextSize(7);
-    display.setTextColor(BLACK, WHITE);
-    display.setCursor(30, 0);
-    display.print(nominaSeleccionada); 
-    display.display();
+    ScreenUtils::displayText(cont2, display, 1, 1, 40);
+    ScreenUtils::displayText(nominaSeleccionada, display, 7, 30, 0);
+//    display.setTextSize(1);
+//    display.setCursor(1, 40);
+//    display.print(cont2);
+//    display.setTextSize(7);
+//    display.setTextColor(BLACK, WHITE);
+//    display.setCursor(30, 0);
+//    display.print(nominaSeleccionada); 
+//    display.display();
     
     delay (30);
     
@@ -108,18 +110,24 @@ void ManejadorDeVotacion::dibujar() {
     }
     
     cont++;
-    
+
     display.clearDisplay();
-    display.setTextSize(1);
-    display.setCursor(15, 5);
-    display.print("En espera");
-    display.setCursor(20, 20);
-    display.print("de TAG");
-    display.setTextSize(1);
-    display.setCursor(1, 40);
-    display.print(cont);
-    display.setTextColor(BLACK, WHITE);
-    display.display();
+    
+    ScreenUtils::displayText("En espera", display, 1, 15, 5);
+    ScreenUtils::displayText("de TAG", display, 1, 20, 20);
+    ScreenUtils::displayText(cont, display, 1, 1, 40);
+    
+//    display.clearDisplay();
+//    display.setTextSize(1);
+//    display.setCursor(15, 5);
+//    display.print("En espera");
+//    display.setCursor(20, 20);
+//    display.print("de TAG");
+//    display.setTextSize(1);
+//    display.setCursor(1, 40);
+//    display.print(cont);
+//    display.setTextColor(BLACK, WHITE);
+//    display.display();
     
     cont2 = 0;
     nominaSeleccionada = 0; 
@@ -141,23 +149,28 @@ void ManejadorDeVotacion::bot2() {
     
     if (cont == 10) {
       display.clearDisplay();
-      display.setTextSize(2);
-      display.setTextColor(BLACK, WHITE);
-      display.setCursor(20, 5);
-      display.print("HAS");
-      display.setCursor(5, 20);
-      display.print("VOTADO");
-      display.display();
+
+      ScreenUtils::displayText("HAS", display, 2, 20, 5);
+      ScreenUtils::displayText("VOTADO", display, 2, 5, 20);
+//      display.setTextSize(2);
+//      display.setTextColor(BLACK, WHITE);
+//      display.setCursor(20, 5);
+//      display.print("HAS");
+//      display.setCursor(5, 20);
+//      display.print("VOTADO");
+//      display.display();
       
       delay (3000);
       
       display.clearDisplay();
-      display.setTextSize(2);
-      display.setCursor(0, 0);
-      display.print("DEPOSITE");
-      display.setCursor(0, 25);
-      display.print("VOTO");
-      display.display();
+      ScreenUtils::displayText("DEPOSITE", display, 2);
+      ScreenUtils::displayText("VOTO", display, 2, 0, 25);
+//      display.setTextSize(2);
+//      display.setCursor(0, 0);
+//      display.print("DEPOSITE");
+//      display.setCursor(0, 25);
+//      display.print("VOTO");
+//      display.display();
       
       delay (5000);
       
