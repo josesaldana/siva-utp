@@ -6,9 +6,12 @@
 #include "Arduino.h"
 #include "Admin.h"
 #include "Voting.h"
+#include "Screen.h"
 
 void setup() {
   Serial.begin(9600);
+
+  ScreenUtils::configDisplay(Adafruit_PCD8544(13, 26, 24, 4,22));
 }
 
 void loop()
