@@ -5,6 +5,8 @@
  */
 #include "Arduino.h"
 #include "Admin.h"
+#include "Voting.h"
+#include "Screen.h"
 
 const unsigned int IN_CONFIGURATION = 1;
 const unsigned int IN_SESSION_CLOSING = 3;
@@ -19,11 +21,7 @@ Admin admin;
 void setup() {
   Serial.begin(9600);
 
-  // Inicializando pantallas
-  ScreenUtils::configDisplay(Adafruit_PCD8544(5, 4, 3));
-
-  // Manejador de Tareas de Administración
-  admin = new Admin();
+  ScreenUtils::configDisplay(Adafruit_PCD8544(13, 26, 24, 4,22));
 }
 
 void loop()
