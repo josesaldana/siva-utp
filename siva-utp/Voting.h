@@ -6,8 +6,6 @@
 #include "Screen.h"
 #include "RFID.h"
 
-
-
 class ManejadorDeVotacion {
   public:
     /**
@@ -26,10 +24,11 @@ class ManejadorDeVotacion {
     const unsigned int PIN_BTN_SELECT = 1;
     const unsigned int PIN_BTN_DOWN = 2;
 
-    // Lectura de botones - Presionado = LOW, No Presionado = HIGH, debido al circuito
+    // Lectura de botones
+    // Presionado = LOW, No Presionado = HIGH, debido al circuito
     volatile int arriba = HIGH;
     volatile int abajo = HIGH;
-    volatile int select = HIGH;
+    volatile int seleccionar = HIGH;
 
     boolean tagPresente = false;
     boolean voto = false;
@@ -72,12 +71,12 @@ void ManejadorDeVotacion::ejecutar(int totalDeNominas) {
   tagPresente = !tagPresente ? leerTag() : tagPresente;
 
   // Leer botones
-  volatile int arriba = digitalRead(PIN_BTN_UP);
-  volatile int abajo = digitalRead(PIN_BTN_DOWN);
-  volatile int votar = digitalRead(PIN_BTN_SELECT);
+  arriba = digitalRead(PIN_BTN_UP);
+  abajo = digitalRead(PIN_BTN_DOWN);
+  seleccionar = digitalRead(PIN_BTN_SELECT);
 
   // Verificaciones de botones
-  if (votar == !HIGH && !voto) { // Seleccion
+  if (seleccionar == !HIGH && !voto) { // Seleccion
     cont++;
     if (cont == 10) {
       // Cuantificar voto
