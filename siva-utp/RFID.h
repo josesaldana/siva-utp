@@ -7,7 +7,7 @@
 #define SS_PIN 53
 #define RST_PIN 49
 
-MFRC522 mfrc522(SS_PIN, RST_PIN); 
+MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 // Byte para almacenar el código del Tag leído
 byte ActualUID[4]; 
@@ -40,9 +40,6 @@ bool leerTag() {
       
       // Enviamos serialemente su UID
       for (byte i = 0; i < mfrc522.uid.size; i++) {
-//        Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-//        Serial.print(mfrc522.uid.uidByte[i], HEX);
-        
         ActualUID[i] = mfrc522.uid.uidByte[i];
       }
       

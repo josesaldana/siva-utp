@@ -8,6 +8,7 @@
 #include "Voting.h"
 #include "Screen.h"
 #include "RFID.h"
+#include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 
@@ -17,13 +18,13 @@ enum States {
   IN_SESSION_CLOSING = 3 
 };
 
-States CURRENT_STATE = States::IN_CONFIGURATION;
-
 const Admin manejadorDeAdministracion;
 const ManejadorDeVotacion manejadorDeVotacion;
 
 const Adafruit_PCD8544 ADMIN_DISPLAY = Adafruit_PCD8544(12, 32, 30, 5, 28);
 const Adafruit_PCD8544 VOTING_DISPLAY = Adafruit_PCD8544(13, 26, 24, 4,22);
+
+States CURRENT_STATE = States::IN_CONFIGURATION;
 
 void setup() {
   Serial.begin(9600);
@@ -35,6 +36,8 @@ void setup() {
   // Manejador de Tareas de Administración
   manejadorDeAdministracion = new Admin();
   manejadorDeVotacion = new ManejadorDeVotacion();
+
+  SPI.begin(); 
 
   // Inicialización del uso del módulo RFID (MFRC522)
   mfrc522.PCD_Init();
@@ -77,14 +80,18 @@ void loop() {
       
       break;
     }
+    
     case States::IN_SESSION: {
-      manejadorDeVotacion.ejecutar();
+      manejadorDeAdministracion.enSession();
+      manejadorDeVotacion.ejecutar(Session::initializeOrGet()->votos().size());
       break;
     }
+    
     case States::IN_SESSION_CLOSING: {
       manejadorDeAdministracion.cerrarSesion();
       break;
     }
+    
     default: printf("Ha ocurrido un error"); // Beep!
   }
 

@@ -32,16 +32,21 @@ enum AdminState {
  */
 class Admin {
   public:
-    /*
+    /**
      * Maneja el flujo de configuración de una sesión 
      * de votación en la urna.
      */
     bool configurarSesion();
 
-    /*
+    /**
      * Maneja el cierre de la sesión de votación.
      */
     void cerrarSesion();
+
+    /**
+     * En sesión
+     */
+     void enSession();
 
     /*
      * Inicializador (constructor) del módulo de administración
@@ -63,6 +68,11 @@ class Admin {
     // Estado actual en flujo de administración
     AdminState CURRENT_STATE = AdminState::PARTIES_SELECTION;
 
+    // Lectura de botones - Presionado = LOW, No Presionado = HIGH, debido al circuito
+    volatile int up = HIGH;
+    volatile int down = HIGH;
+    volatile int select = HIGH;
+
     // Variables de trabajo, globales al módulo
     int cantidadMaximaDeNominas = 1;
     int selectButtonState = 1;
@@ -73,6 +83,7 @@ class Admin {
     // Definición de estados
     void seleccionDeNominas();
     void impresionDeReporte();
+    
 };
 
 Admin::Admin() {
@@ -94,12 +105,19 @@ bool Admin::configurarSesion() {
 
 void Admin::seleccionDeNominas() {
   display.clearDisplay();
-  ScreenUtils::displayText("Nominas:", display, 1);
+
+  // Title
+  ScreenUtils::displayText("Nominas", display, 1, 23, 0);
+  display.drawFastHLine(0,4,15,BLACK);
+  display.drawFastHLine(70,4,15,BLACK);
+
+  up = digitalRead(BTN_UP_PIN);
+  down = digitalRead(BTN_DOWN_PIN);
 
   // Read pressed button
-  if(digitalRead(BTN_UP_PIN)== !HIGH) 
+  if(up == !HIGH) 
     cantidadMaximaDeNominas -= cantidadMaximaDeNominas > 0 ? 1 : 0;
-  else if(digitalRead(BTN_DOWN_PIN) == !HIGH) 
+  else if(down == !HIGH) 
     cantidadMaximaDeNominas += 1;
   else {
     selectButtonState = digitalRead(BTN_SELECT_PIN);
@@ -123,7 +141,7 @@ void Admin::seleccionDeNominas() {
   }
 
   String cantidadDeNominas = String(cantidadMaximaDeNominas-1); // Esto puede mejorarse
-  ScreenUtils::displayText(cantidadDeNominas.c_str(), display, 5, (80/2)-10, 10);
+  ScreenUtils::displayText(cantidadDeNominas.c_str(), display, 5, (80/2)-10, 12);
 }
 
 void Admin::impresionDeReporte() {
@@ -139,6 +157,11 @@ void Admin::impresionDeReporte() {
   //TODO: Imprimir reporte
 
   delay(3000);
+}
+
+void Admin::enSession() {
+  display.clearDisplay();
+  ScreenUtils::displayText("En Session...", display, 1);
 }
 
 void Admin::cerrarSesion() {
