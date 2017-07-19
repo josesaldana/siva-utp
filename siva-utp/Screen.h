@@ -11,23 +11,23 @@ class ScreenUtils {
     static void configureDisplay(const Adafruit_PCD8544& display) {
       display.begin();   
       display.setContrast(CONTRAST_1); 
-      display.clearDisplay(); 
+      display.clearDisplay();
       display.display();   
     }
 
     static void displayText(char* text, 
-        const Adafruit_PCD8544 display, 
-        int textSize, 
+        Adafruit_PCD8544* display, 
+        int textSize = 1, 
         int xPosition = 0, 
         int yPosition = 0, 
         bool isSelected = false) {
-      if(isSelected) display.setTextColor(WHITE, BLACK);
-      else display.setTextColor(BLACK, WHITE);  
+      if(isSelected) display->setTextColor(WHITE, BLACK);
+      else display->setTextColor(BLACK, WHITE);  
       
-      display.setTextSize(textSize);
-      display.setCursor(xPosition, yPosition);
-      display.print(text); 
-      display.display();
+      display->setTextSize(textSize);
+      display->setCursor(xPosition, yPosition);
+      display->print(text); 
+      display->display();
       
       delay (30);
     }

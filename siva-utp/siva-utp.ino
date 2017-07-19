@@ -15,41 +15,45 @@
 enum States { 
   IN_CONFIGURATION = 1, 
   IN_SESSION = 2, 
-  IN_SESSION_CLOSING = 3 
+  IN_SESSION_CLOSING = 3,
+  SESSION_CLOSED = 4 
 };
-
-const Admin manejadorDeAdministracion;
-const ManejadorDeVotacion manejadorDeVotacion;
-
-const Adafruit_PCD8544 ADMIN_DISPLAY = Adafruit_PCD8544(12, 32, 30, 5, 28);
-const Adafruit_PCD8544 VOTING_DISPLAY = Adafruit_PCD8544(13, 26, 24, 4,22);
 
 States CURRENT_STATE = States::IN_CONFIGURATION;
 
+Adafruit_PCD8544 ADMIN_DISPLAY = Adafruit_PCD8544(12, 32, 30, 5, 28);
+Adafruit_PCD8544 VOTING_DISPLAY = Adafruit_PCD8544(13, 26, 24, 4,22);
+
+const Admin manejadorDeAdministracion(&ADMIN_DISPLAY);
+const ManejadorDeVotacion manejadorDeVotacion(&VOTING_DISPLAY);
+
 void setup() {
   Serial.begin(9600);
+  
+  SPI.begin(); 
+
+  // Inicialización del uso del módulo RFID (MFRC522)
+  mfrc522.PCD_Init();
+
+  // Inicializando la impresora
+  mySerial.begin(19200);
 
   // Inicializando pantallas
   ScreenUtils::configureDisplay(ADMIN_DISPLAY); // Administración
   ScreenUtils::configureDisplay(VOTING_DISPLAY);  // Votación
 
-  // Manejador de Tareas de Administración
-  manejadorDeAdministracion = new Admin();
-  manejadorDeVotacion = new ManejadorDeVotacion();
-
-  SPI.begin(); 
-
-  // Inicialización del uso del módulo RFID (MFRC522)
-  mfrc522.PCD_Init();
+//  // Manejador de Tareas de Administración
+//  manejadorDeAdministracion = new Admin();
+//  manejadorDeVotacion = new ManejadorDeVotacion();  
 }
 
 void loop() {  
   // Workaround tentativo para visualizar texto en las pantallas
-  ADMIN_DISPLAY.print("");
-  ADMIN_DISPLAY.display();
-
-  VOTING_DISPLAY.print("");
-  VOTING_DISPLAY.display();
+//  ADMIN_DISPLAY.print("");
+//  ADMIN_DISPLAY.display();
+//
+//  VOTING_DISPLAY.print("");
+//  VOTING_DISPLAY.display();
   
   // -----------
   // Device flow:
@@ -82,20 +86,36 @@ void loop() {
     }
     
     case States::IN_SESSION: {
-      manejadorDeAdministracion.enSession();
-      manejadorDeVotacion.ejecutar(Session::initializeOrGet()->votos().size());
+      bool siguienteEstado = manejadorDeAdministracion.enSession();
+
+      if(siguienteEstado) {
+        CURRENT_STATE = States::IN_SESSION_CLOSING;
+      } else {
+        manejadorDeVotacion.ejecutar(Session::initializeOrGet()->votos().size());
+      }
+      
       break;
     }
     
     case States::IN_SESSION_CLOSING: {
       manejadorDeAdministracion.cerrarSesion();
+      CURRENT_STATE = States::SESSION_CLOSED;
+      break;
+    }
+
+    case States::SESSION_CLOSED: {
+      ScreenUtils::displayText("Sesion ", &VOTING_DISPLAY, 1);
+      ScreenUtils::displayText("finalizada ", &VOTING_DISPLAY, 1, 0, 10);
+      ScreenUtils::displayText("Sesion ", &ADMIN_DISPLAY, 1);
+      ScreenUtils::displayText("finalizada ", &ADMIN_DISPLAY, 1, 0, 10);
+      
       break;
     }
     
     default: printf("Ha ocurrido un error"); // Beep!
   }
 
-  delay(100);
+  //delay(100);
 }
 
 

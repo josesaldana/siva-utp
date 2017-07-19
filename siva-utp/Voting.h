@@ -13,12 +13,12 @@ class ManejadorDeVotacion {
      */
     void ejecutar(int totalDeNominas);
 
-    ManejadorDeVotacion();
+    ManejadorDeVotacion(Adafruit_PCD8544* display);
     
     ManejadorDeVotacion operator=(const &) {};
     
   private:
-    const Adafruit_PCD8544 display = Adafruit_PCD8544(13, 26, 24, 4,22); 
+    const Adafruit_PCD8544* display; // = Adafruit_PCD8544(13, 26, 24, 4,22); 
 
     const unsigned int PIN_BTN_UP = 0;
     const unsigned int PIN_BTN_SELECT = 1;
@@ -57,11 +57,13 @@ class ManejadorDeVotacion {
     void ajustarSeleccion(int totalDeNominas);
 };
 
-ManejadorDeVotacion::ManejadorDeVotacion() {
+ManejadorDeVotacion::ManejadorDeVotacion(Adafruit_PCD8544* d) {
   // Pines de botones
   pinMode(PIN_BTN_UP, INPUT_PULLUP);
   pinMode(PIN_BTN_SELECT, INPUT_PULLUP);
   pinMode(PIN_BTN_DOWN, INPUT_PULLUP);
+
+  display = d;
 }
 
 void ManejadorDeVotacion::ejecutar(int totalDeNominas) { 
@@ -78,9 +80,13 @@ void ManejadorDeVotacion::ejecutar(int totalDeNominas) {
   // Verificaciones de botones
   if (seleccionar == !HIGH && !voto) { // Seleccion
     cont++;
+    
     if (cont == 10) {
       // Cuantificar voto
       Session::initializeOrGet()->votar(nominaSeleccionada);
+
+      // Imprimir el voto
+      ServicioDeImpresion::imprimirVoto(nominaSeleccionada);
 
       // Reseteo
       cont = 0;
@@ -124,19 +130,19 @@ void ManejadorDeVotacion::mostrarPantalla() {
 }
 
 void ManejadorDeVotacion::dibujarEsperaDeTag() {
-  display.clearDisplay();
+  display->clearDisplay();
   ScreenUtils::displayText("En espera", display, 1, 15, 5);
   ScreenUtils::displayText("de TAG", display, 1, 20, 20);
   delay (30);
 }
 
 void ManejadorDeVotacion::dibujarSeleccionDeNomina() {
-  display.clearDisplay();
+  display->clearDisplay();
 
   // Title
   ScreenUtils::displayText("Seleccione", display, 1, 13, 0);
-  display.drawFastHLine(0,4,8,BLACK);
-  display.drawFastHLine(77,4,8,BLACK);
+  display->drawFastHLine(0,4,8,BLACK);
+  display->drawFastHLine(77,4,8,BLACK);
   
   itoa(nominaSeleccionada, buffer, 10);
   ScreenUtils::displayText(buffer , display, 5, (80/2)-10, 12);
@@ -144,16 +150,14 @@ void ManejadorDeVotacion::dibujarSeleccionDeNomina() {
 }
 
 void ManejadorDeVotacion::dibujarConfirmacionDeVoto() {
-  display.clearDisplay();
+  display->clearDisplay();
   
-  display.drawFastHLine(25,21,40,BLACK);
+  display->drawFastHLine(25,21,40,BLACK);
   ScreenUtils::displayText("Ha votado!", display, 1, 13, 6);
   ScreenUtils::displayText("Deposite su", display, 1, 9, 28);
   ScreenUtils::displayText("voto", display, 1, 30, 40);
 
-  printf("Before delay\n");
-  delay (6000);
-  printf("After delay\n");
+//  delay (6000);
 
   voto = false;
 }

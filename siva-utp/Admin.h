@@ -2,9 +2,9 @@
 #define ADMIN_H
 
 #include "Arduino.h"
-#include "Printer.h"
 #include "Screen.h"
 #include "Session.h"
+#include "Printer.h"
 #include <ArduinoSTL.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
@@ -39,19 +39,19 @@ class Admin {
     bool configurarSesion();
 
     /**
+     * En sesión
+     */
+     bool enSession();
+
+    /**
      * Maneja el cierre de la sesión de votación.
      */
     void cerrarSesion();
 
-    /**
-     * En sesión
-     */
-     void enSession();
-
     /*
      * Inicializador (constructor) del módulo de administración
      */
-    Admin();
+    Admin(Adafruit_PCD8544* display);
     
     Admin operator=(const &) {};
     
@@ -63,7 +63,7 @@ class Admin {
     const unsigned int TEMPORIZADOR_DE_SELECCION = 5000;
 
     // Referencia interna a pantalla
-    const Adafruit_PCD8544 display = Adafruit_PCD8544(12, 32, 30, 5, 28); 
+    Adafruit_PCD8544* display; 
 
     // Estado actual en flujo de administración
     AdminState CURRENT_STATE = AdminState::PARTIES_SELECTION;
@@ -86,10 +86,12 @@ class Admin {
     
 };
 
-Admin::Admin() {
+Admin::Admin(Adafruit_PCD8544* d) {
   pinMode(BTN_UP_PIN, INPUT_PULLUP);
   pinMode(BTN_DOWN_PIN, INPUT_PULLUP);
   pinMode(BTN_SELECT_PIN, INPUT_PULLUP);
+
+  display = d;
 }
 
 bool Admin::configurarSesion() {
@@ -104,12 +106,12 @@ bool Admin::configurarSesion() {
 }
 
 void Admin::seleccionDeNominas() {
-  display.clearDisplay();
+  display->clearDisplay();
 
   // Title
   ScreenUtils::displayText("Nominas", display, 1, 23, 0);
-  display.drawFastHLine(0,4,15,BLACK);
-  display.drawFastHLine(70,4,15,BLACK);
+  display->drawFastHLine(0,4,15,BLACK);
+  display->drawFastHLine(70,4,15,BLACK);
 
   up = digitalRead(BTN_UP_PIN);
   down = digitalRead(BTN_DOWN_PIN);
@@ -145,7 +147,7 @@ void Admin::seleccionDeNominas() {
 }
 
 void Admin::impresionDeReporte() {
-  display.clearDisplay();
+  display->clearDisplay();
 
   ScreenUtils::displayText("Sesion inicia-.", display, 1);
   ScreenUtils::displayText("da.", display, 1, 0, 10);
@@ -153,19 +155,48 @@ void Admin::impresionDeReporte() {
   ScreenUtils::displayText("estatus...", display, 1, 0, 35);
 
   vector<int> resultados = Session::initializeOrGet()->votos();
-
-  //TODO: Imprimir reporte
+  ServicioDeImpresion::imprimirInforme(resultados);
 
   delay(3000);
 }
 
-void Admin::enSession() {
-  display.clearDisplay();
+bool Admin::enSession() {
+  display->clearDisplay();
   ScreenUtils::displayText("En Session...", display, 1);
+
+  up = digitalRead(BTN_UP_PIN);
+  down = digitalRead(BTN_DOWN_PIN);
+
+  // Read pressed button
+  if(up == !HIGH) 
+    cantidadMaximaDeNominas -= cantidadMaximaDeNominas > 0 ? 1 : 0;
+  else if(down == !HIGH) 
+    cantidadMaximaDeNominas += 1;
+  else {
+    selectButtonState = digitalRead(BTN_SELECT_PIN);
+    
+    if(selectButtonState != lastSelectButtonState) {
+      if(selectButtonState == !HIGH) {
+        startPressed = millis();
+      }
+    } else {
+      if(selectButtonState == !HIGH) {
+        int elapsedTime = millis() - startPressed;
+        
+        if(elapsedTime >= TEMPORIZADOR_DE_SELECCION) {
+          return true;
+        }
+      }
+    }
+
+    lastSelectButtonState = selectButtonState;
+  }
+
+  return false;
 }
 
 void Admin::cerrarSesion() {
-  display.clearDisplay();
+  display->clearDisplay();
 
   ScreenUtils::displayText("Sesion finali-.", display, 1);
   ScreenUtils::displayText("zada.", display, 1, 0, 10);
@@ -173,8 +204,7 @@ void Admin::cerrarSesion() {
   ScreenUtils::displayText("resultados...", display, 1, 0, 35);
 
   vector<int> resultados = Session::initializeOrGet()->votos();
-
-  //TODO: Imprimir reporte
+  ServicioDeImpresion::imprimirInforme(resultados);
 
   delay(1000);
 }
