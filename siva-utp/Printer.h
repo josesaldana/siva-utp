@@ -1,77 +1,98 @@
-#ifndef PRINT_H
-#define PRINT_H
+#ifndef PRINTER_H
+#define PRINTER_H
+
+#include <ArduinoSTL.h>
+
+/*------------------------------------------------------------------------
+  Example sketch for Adafruit Thermal Printer library for Arduino.
+  Demonstrates a few text styles & layouts, bitmap printing, etc.
+
+  IMPORTANT: DECLARATIONS DIFFER FROM PRIOR VERSIONS OF THIS LIBRARY.
+  This is to support newer & more board types, especially ones that don't
+  support SoftwareSerial (e.g. Arduino Due).  You can pass any Stream
+  (e.g. Serial1) to the printer constructor.  See notes below.
+
+  You may need to edit the PRINTER_FIRMWARE value in Adafruit_Thermal.h
+  to match your printer (hold feed button on powerup for test page).
+  ------------------------------------------------------------------------*/
+
+#include "Adafruit_Thermal.h"
+
+using namespace std;
+
+// Aquí está la nueva sintaxis al usar SoftwareSerial(e.g. Arduino Uno) ----
 
 #include <SoftwareSerial.h>
 
-const char ZERO             = 0;
-const int HEAD_TIME         = 80;
-const int HEAD_INTERVAL     = 255;
-const char PRINT_DENSITY    = 15; 
-const char PRINT_BREAK_TIME = 15;
+#define TX_PIN 38 // Arduino transmite el Rayo Amarillo rotulado RX en la impresora
+#define RX_PIN 39 // Arduino recibe el cable verde con etiqueta TX en la impresora
 
-SoftwareSerial Thermal(8, 9);
+SoftwareSerial mySerial(RX_PIN, TX_PIN); // Declarar el SoftwareSerial como objeto primeto.
 
-/**
- * Reporte para impresión
- */
-class PrintLine {};
+Adafruit_Thermal printer(&mySerial);     // Pasar la direccion al constructor de la impresora
 
-class PrintReport {
+/** A continuación, consultar la función setup () con respecto a las llamadas de serie e 
+    impresora begin().*/
+
+// Aquí está la sintaxis para hardware serial (e.g. Arduino Due) --------------
+
+//Adafruit_Thermal printer(&Serial1);      // Or Serial2, Serial3, etc.
+
+// -----------------------------------------------------------------------
+class ServicioDeImpresion {            // Clase encargada de las impresiones de las votaciones
+  
   public:
-    PrintReport();
-  private:
-    PrintLine lines[];
+  static void imprimir(int x){    // Funcion recibira un valor tipo entero
+    printer.doubleHeightOn();     // Hacer que la altura del valor sea el doble
+    printer.setSize('L');         // Imprimir el valor en tamaño Large (grande) moderado 
+    printer.justify('C');         // Imprimir el valor justidicado centrado
+    printer.println(F("\n\n"));   // Salto de dos lineas
+    printer.println(x);           // Imprimir el valor recibido
+    printer.println(F("\n\n"));   // Salto de dos lineas
+     printer.feed(2);             // salto de linea
+     printersleep();              // Detener la impresora
+  }
+  
+  static void printersleep(){
+    printer.sleep();            // Decirle a la impresora que se detenga
+    delay(3000L);               // Detenerse por 3 segundos
+    printer.wake();             // Debe iniciar() antes de imprimir de nuevo, incluso si se restablece
+    printer.setDefault();       // Restaurar la impresora a los valores predeterminados.
+  }
+
+  static void imprimirInforme(vector <int> resultados){   // Funcion encargada de recibir los valores asignados enviado 
+                                              // por la funcion asignarNum()
+    int suma = 0;
+    
+    printer.doubleHeightOn();                 // Hacer que la altura del valor sea el doble
+    printer.setSize('L');                     // Imprimir el valor en tamaño Large (grande) moderado
+    printer.justify('C');                     // Imprimir el valor justidicado centrado
+
+    printer.println(F("\n"));
+    printer.print("Nomina   Voto");         // Impresion de encabezado
+    printer.println(F("\n"));                 // Salto de linea
+
+    for (int x; x < resultados.size(); x++) {
+     suma = suma + resultados[x];                    // contador para total de votos
+     printer.print(x);                        // Imprimir el valor recibido
+     printer.print(F("   -   "));             // Imprimir un guion a lado del valor de la votacion para imprimir la urna junto a la votacion
+     printer.print(resultados[x]);                   // Imprimir el numero de urna
+     printer.println("");                       // Un salto de linea
+   }
+
+//   printersleep();                            // Detener la impresora
+
+   printer.println(F("\n"));
+   printer.print(F("Total: ")); 
+   printer.print(suma);
+   for(int i = 0; i < 3; i++)   
+    printer.println(F("\n"));
+  }
+
+  static void imprimirVoto(int x){                 // Funcion imprimir Votos que recibe el valor entero
+    imprimir(x);                              // Imprimir valor
+  }
+    
 };
 
-/**
- * Printer class
- * 
- * Esta clase representa el servicio de impresión
- */
-class Printer {
-  public:
-    Printer();
-    void print(PrintReport report);
-    void printBigNumber(int number);
-};
-
-Printer::Printer() {
-  //===============
-  // Init Printer
-  //===============
-  
-  // Modify the print speed and heat
-  Thermal.write(27);
-  Thermal.write(55);
-  
-  Thermal.write(7); //Default 64 dots = 8*('7'+1)
-  Thermal.write(HEAD_TIME); //Default 80 or 800us
-  Thermal.write(HEAD_TIME); //Default 2 or 20us
-  
-  //Modify the print density and timeout
-  Thermal.write(18);
-  Thermal.write(35);
-  
-  int printSetting = (PRINT_DENSITY << 4) | PRINT_BREAK_TIME;
-  Thermal.write(printSetting); //Combination of printDensity and printBreakTime
-  
-  Serial.println();
-  Serial.println("Printer ready"); 
- 
-  Thermal.begin(19200); // to write to our new printer
-  //Serial.begin(57600);
-}
-
-void Printer::print(PrintReport report) {
-  // turn off underline
-  Thermal.write(27); 
-  Thermal.write(45);
-  Thermal.write(ZERO);
-  delay(3000);
-  Thermal.write(27); 
-  Thermal.write(32);
-
-  // Write the report to the printer
-}
-
-#endif //PRINT_H
+#endif //PRINTER_H

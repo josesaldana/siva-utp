@@ -3,199 +3,165 @@
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
-#include <MFRC522.h>
-
-#define SS_PIN 53
-#define RST_PIN 49
-
-MFRC522 mfrc522(SS_PIN, RST_PIN); 
-
-const unsigned int SCREEN_CONTRAST = 60;
+#include "Screen.h"
+#include "RFID.h"
 
 class ManejadorDeVotacion {
   public:
     /**
-     * Inicialización del manejo de sesión
+     * Loop de manejo de la sesión de votación
      */
-    ManejadorDeVotacion();
+    void ejecutar(int totalDeNominas);
 
-    /**
-     * Loop de manejo de sesión
-     */
-    void ejecutar();
+    ManejadorDeVotacion(Adafruit_PCD8544* display);
+    
+    ManejadorDeVotacion operator=(const &) {};
     
   private:
-    // Acceso a pantalla
-    Adafruit_PCD8544 display = Adafruit_PCD8544(13, 26, 24, 4,22); 
+    const Adafruit_PCD8544* display; // = Adafruit_PCD8544(13, 26, 24, 4,22); 
 
-    // Acceso a RFID
-//    MFRC522 mfrc522(SS_PIN, RST_PIN); 
-//    MFRC522 mfrc522(53, 49); 
+    const unsigned int PIN_BTN_UP = 0;
+    const unsigned int PIN_BTN_SELECT = 1;
+    const unsigned int PIN_BTN_DOWN = 2;
+
+    // Lectura de botones
+    // Presionado = LOW, No Presionado = HIGH, debido al circuito
+    volatile int arriba = HIGH;
+    volatile int abajo = HIGH;
+    volatile int seleccionar = HIGH;
+
+    boolean tagPresente = false;
+    boolean voto = false;
     
-    boolean  voto = false;
-    boolean acces = false;
-    boolean tag = false;
-    
-    // Botones
     int nominaSeleccionada = 0;
-    
-    int arriba = 0;
-    int abajo = 0;
-    int votar = 0;
-    
     int cont = 0;
-    int cont2 = 0;
-    int lim = 100;
 
-    void dibujar();
-    void bot();
-    void bot2();
-    void bot3();
-    void error();
-    void lectura();
+    char buffer[10];
+
+    /*
+     * Despliega la pantalla específica de acuerdo al flujo
+     */
+    void mostrarPantalla();
+
+    /*
+     * Pantallas
+     */
+     void dibujarEsperaDeTag();
+     void dibujarSeleccionDeNomina();
+     void dibujarConfirmacionDeVoto();
+
+    /*
+     * Ajuste de nómina si se excede la cantidad 
+     * seleccionada.
+     */
+    void ajustarSeleccion(int totalDeNominas);
 };
 
-ManejadorDeVotacion::ManejadorDeVotacion() {
-  // Inicialización del uso del módulo RFID (MFRC522)
-  mfrc522.PCD_Init();
-
+ManejadorDeVotacion::ManejadorDeVotacion(Adafruit_PCD8544* d) {
   // Pines de botones
-  pinMode(2, INPUT_PULLUP);
-  pinMode(1, INPUT_PULLUP);
-  pinMode(0, INPUT_PULLUP);
+  pinMode(PIN_BTN_UP, INPUT_PULLUP);
+  pinMode(PIN_BTN_SELECT, INPUT_PULLUP);
+  pinMode(PIN_BTN_DOWN, INPUT_PULLUP);
+
+  display = d;
 }
 
-void ManejadorDeVotacion::ejecutar() { 
-  lectura();
+void ManejadorDeVotacion::ejecutar(int totalDeNominas) { 
+  if(totalDeNominas <= 0) return;
   
-  abajo = digitalRead(2);
-  votar = digitalRead(1);
-  arriba = digitalRead(0);
-  
-  bot();
-  bot2();
-  bot3();
-  
-  error();
-  
-  dibujar();
-}
+  // Verificación de tag presente
+  tagPresente = !tagPresente ? leerTag() : tagPresente;
 
-void ManejadorDeVotacion::dibujar() {
-  if (tag == true & voto == false & acces == true) {
-    if (cont2 == lim) {
+  // Leer botones
+  arriba = digitalRead(PIN_BTN_UP);
+  abajo = digitalRead(PIN_BTN_DOWN);
+  seleccionar = digitalRead(PIN_BTN_SELECT);
+
+  // Verificaciones de botones
+  if (seleccionar == !HIGH && !voto) { // Seleccion
+    cont++;
+    
+    if (cont == 10) {
+      // Cuantificar voto
+      Session::initializeOrGet()->votar(nominaSeleccionada);
+
+      // Imprimir el voto
+      ServicioDeImpresion::imprimirVoto(nominaSeleccionada);
+
+      // Reseteo
+      cont = 0;
+      tagPresente = false;
+      nominaSeleccionada = 0; 
+
+      // Control de pantalla
       voto = true;
     }
-    
-    cont2++;
-    
-    display.clearDisplay();
-    display.setContrast(SCREEN_CONTRAST);
-    ScreenUtils::displayText(cont2, display, 1, 1, 40);
-    ScreenUtils::displayText(nominaSeleccionada, display, 7, 30, 0);
-//    display.setTextSize(1);
-//    display.setCursor(1, 40);
-//    display.print(cont2);
-//    display.setTextSize(7);
-//    display.setTextColor(BLACK, WHITE);
-//    display.setCursor(30, 0);
-//    display.print(nominaSeleccionada); 
-//    display.display();
-    
-    delay (30);
-    
-  } else {
-    if (cont == 200) {
-      tag = true;
-    }
-    
-    cont++;
+  } else if (arriba == !HIGH && !voto) { // Arriba
+    nominaSeleccionada++;
+    delay (100);
+    cont = 0;
+  } else if (abajo == !HIGH && !voto) { // Abajo
+    nominaSeleccionada--;
+    delay (100);
+    cont = 0;
+  } else cont = 0;
 
-    display.clearDisplay();
-    
-    ScreenUtils::displayText("En espera", display, 1, 15, 5);
-    ScreenUtils::displayText("de TAG", display, 1, 20, 20);
-    ScreenUtils::displayText(cont, display, 1, 1, 40);
-    
-//    display.clearDisplay();
-//    display.setTextSize(1);
-//    display.setCursor(15, 5);
-//    display.print("En espera");
-//    display.setCursor(20, 20);
-//    display.print("de TAG");
-//    display.setTextSize(1);
-//    display.setCursor(1, 40);
-//    display.print(cont);
-//    display.setTextColor(BLACK, WHITE);
-//    display.display();
-    
-    cont2 = 0;
-    nominaSeleccionada = 0; 
-    
-    delay (30);
-  }
+  // Ajuste del valor de la nómina (0 >= nominaSeleccionada <= totalDeNominas)
+  ajustarSeleccion(totalDeNominas);
+
+  // Mostrar pantalla (de acuerdo al estado)
+  mostrarPantalla();
 }
 
-void ManejadorDeVotacion::error() {
-  if (nominaSeleccionada < 0 or nominaSeleccionada > 9) {
+void ManejadorDeVotacion::ajustarSeleccion(int totalDeNominas) {
+  if (nominaSeleccionada < 0 or nominaSeleccionada > totalDeNominas-1) {
     nominaSeleccionada = 0;
   }
 }
 
-void ManejadorDeVotacion::bot2() {
-  if (votar == 0 & voto == false) {
-    lim++;
-    cont++;
-    
-    if (cont == 10) {
-      display.clearDisplay();
-
-      ScreenUtils::displayText("HAS", display, 2, 20, 5);
-      ScreenUtils::displayText("VOTADO", display, 2, 5, 20);
-//      display.setTextSize(2);
-//      display.setTextColor(BLACK, WHITE);
-//      display.setCursor(20, 5);
-//      display.print("HAS");
-//      display.setCursor(5, 20);
-//      display.print("VOTADO");
-//      display.display();
-      
-      delay (3000);
-      
-      display.clearDisplay();
-      ScreenUtils::displayText("DEPOSITE", display, 2);
-      ScreenUtils::displayText("VOTO", display, 2, 0, 25);
-//      display.setTextSize(2);
-//      display.setCursor(0, 0);
-//      display.print("DEPOSITE");
-//      display.setCursor(0, 25);
-//      display.print("VOTO");
-//      display.display();
-      
-      delay (5000);
-      
-      acces = false;
-      voto = true;
-      cont = 0;
-      tag = false;
-    }
+void ManejadorDeVotacion::mostrarPantalla() {
+  if (tagPresente && !voto) {
+    dibujarSeleccionDeNomina();
+  } else if(voto) {
+    dibujarConfirmacionDeVoto();
+  } else {
+    dibujarEsperaDeTag();
   }
 }
 
-void ManejadorDeVotacion::bot() {
-  if (arriba == 0 & voto == false) {
-    nominaSeleccionada++;
-    delay (100);
-    cont = 0;
-  }
+void ManejadorDeVotacion::dibujarEsperaDeTag() {
+  display->clearDisplay();
+  ScreenUtils::displayText("En espera", display, 1, 15, 5, false);
+  ScreenUtils::displayText("de TAG", display, 1, 20, 20);
+  delay (30);
 }
- 
-void ManejadorDeVotacion::bot3() {
-  if (abajo == 0 & voto == false) {
-    nominaSeleccionada--;
-    delay (100);
-    cont = 0;
-  }
+
+void ManejadorDeVotacion::dibujarSeleccionDeNomina() {
+  display->clearDisplay();
+
+  // Title
+  ScreenUtils::displayText("Seleccione", display, 1, 13, 0, false);
+  display->drawFastHLine(0,4,8,BLACK);
+  display->drawFastHLine(77,4,8,BLACK);
+  
+  itoa(nominaSeleccionada, buffer, 10);
+  ScreenUtils::displayText(buffer , display, 5, (80/2)-10, 12);
+  delay (30);
 }
+
+void ManejadorDeVotacion::dibujarConfirmacionDeVoto() {
+  display->clearDisplay();
+  
+  display->drawFastHLine(25,21,40,BLACK);
+  ScreenUtils::displayText("Ha votado!", display, 1, 13, 6, false);
+  ScreenUtils::displayText("Deposite su", display, 1, 9, 28, false);
+  ScreenUtils::displayText("voto", display, 1, 30, 40);
+
+  delay (6000);
+
+  voto = false;
+}
+
+
 
 #endif //VOTING_H

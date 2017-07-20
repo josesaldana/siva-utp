@@ -1,0 +1,22 @@
+{
+  "name": "siva-utp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Gruntfile.js",
+  "dependencies": {
+    "grunt-arduino": "^0.1.0",
+    "grunt-cli": "^1.2.0"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1"
+  },
+  "scripts": {
+    "test": "test-all"
+  },
+  "keywords": [
+    "SIVA",
+    "UTP"
+  ],
+  "author": "1LS231",
+  "license": "ISC"
+}
