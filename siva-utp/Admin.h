@@ -79,6 +79,7 @@ class Admin {
     int lastSelectButtonState = 1;
     int startPressed = 0;
     int endPressed = 0;
+    char buffer2[10]; 
     
     // Definición de estados
     void seleccionDeNominas();
@@ -109,7 +110,7 @@ void Admin::seleccionDeNominas() {
   display->clearDisplay();
 
   // Title
-  ScreenUtils::displayText("Nominas", display, 1, 23, 0);
+  ScreenUtils::displayText("Nominas", display, 1, 23, 0, false);
   display->drawFastHLine(0,4,15,BLACK);
   display->drawFastHLine(70,4,15,BLACK);
 
@@ -118,9 +119,9 @@ void Admin::seleccionDeNominas() {
 
   // Read pressed button
   if(up == !HIGH) 
-    cantidadMaximaDeNominas -= cantidadMaximaDeNominas > 0 ? 1 : 0;
-  else if(down == !HIGH) 
     cantidadMaximaDeNominas += 1;
+  else if(down == !HIGH)
+    cantidadMaximaDeNominas -= cantidadMaximaDeNominas > 1 ? 1 : 0;
   else {
     selectButtonState = digitalRead(BTN_SELECT_PIN);
     
@@ -142,16 +143,16 @@ void Admin::seleccionDeNominas() {
     lastSelectButtonState = selectButtonState;
   }
 
-  String cantidadDeNominas = String(cantidadMaximaDeNominas-1); // Esto puede mejorarse
-  ScreenUtils::displayText(cantidadDeNominas.c_str(), display, 5, (80/2)-10, 12);
+  itoa(cantidadMaximaDeNominas, buffer2, 10);
+  ScreenUtils::displayText(buffer2, display, 5, (80/2)-10, 12);
 }
 
 void Admin::impresionDeReporte() {
   display->clearDisplay();
 
-  ScreenUtils::displayText("Sesion inicia-.", display, 1);
-  ScreenUtils::displayText("da.", display, 1, 0, 10);
-  ScreenUtils::displayText("Imprimiendo", display, 1, 0, 25);
+  ScreenUtils::displayText("Sesion inicia-.", display, 1, false);
+  ScreenUtils::displayText("da.", display, 1, 0, 10, false);
+  ScreenUtils::displayText("Imprimiendo", display, 1, 0, 25, false);
   ScreenUtils::displayText("estatus...", display, 1, 0, 35);
 
   vector<int> resultados = Session::initializeOrGet()->votos();
@@ -198,15 +199,15 @@ bool Admin::enSession() {
 void Admin::cerrarSesion() {
   display->clearDisplay();
 
-  ScreenUtils::displayText("Sesion finali-.", display, 1);
-  ScreenUtils::displayText("zada.", display, 1, 0, 10);
-  ScreenUtils::displayText("Imprimiendo", display, 1, 0, 25);
+  ScreenUtils::displayText("Sesion finali-.", display, 1, false);
+  ScreenUtils::displayText("zada.", display, 1, 0, 10, false);
+  ScreenUtils::displayText("Imprimiendo", display, 1, 0, 25, false);
   ScreenUtils::displayText("resultados...", display, 1, 0, 35);
 
   vector<int> resultados = Session::initializeOrGet()->votos();
   ServicioDeImpresion::imprimirInforme(resultados);
 
-  delay(1000);
+  delay(5000);
 }
 
 #endif //ADMIN_H

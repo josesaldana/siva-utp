@@ -20,6 +20,7 @@ class ScreenUtils {
         int textSize = 1, 
         int xPosition = 0, 
         int yPosition = 0, 
+        bool doDisplay = true,
         bool isSelected = false) {
       if(isSelected) display->setTextColor(WHITE, BLACK);
       else display->setTextColor(BLACK, WHITE);  
@@ -27,7 +28,8 @@ class ScreenUtils {
       display->setTextSize(textSize);
       display->setCursor(xPosition, yPosition);
       display->print(text); 
-      display->display();
+      if(doDisplay) 
+        display->display();
       
       delay (30);
     }

@@ -36,7 +36,7 @@ class ManejadorDeVotacion {
     int nominaSeleccionada = 0;
     int cont = 0;
 
-    char buffer[1];
+    char buffer[10];
 
     /*
      * Despliega la pantalla específica de acuerdo al flujo
@@ -114,7 +114,7 @@ void ManejadorDeVotacion::ejecutar(int totalDeNominas) {
 }
 
 void ManejadorDeVotacion::ajustarSeleccion(int totalDeNominas) {
-  if (nominaSeleccionada < 0 or nominaSeleccionada > totalDeNominas) {
+  if (nominaSeleccionada < 0 or nominaSeleccionada > totalDeNominas-1) {
     nominaSeleccionada = 0;
   }
 }
@@ -131,7 +131,7 @@ void ManejadorDeVotacion::mostrarPantalla() {
 
 void ManejadorDeVotacion::dibujarEsperaDeTag() {
   display->clearDisplay();
-  ScreenUtils::displayText("En espera", display, 1, 15, 5);
+  ScreenUtils::displayText("En espera", display, 1, 15, 5, false);
   ScreenUtils::displayText("de TAG", display, 1, 20, 20);
   delay (30);
 }
@@ -140,7 +140,7 @@ void ManejadorDeVotacion::dibujarSeleccionDeNomina() {
   display->clearDisplay();
 
   // Title
-  ScreenUtils::displayText("Seleccione", display, 1, 13, 0);
+  ScreenUtils::displayText("Seleccione", display, 1, 13, 0, false);
   display->drawFastHLine(0,4,8,BLACK);
   display->drawFastHLine(77,4,8,BLACK);
   
@@ -153,11 +153,11 @@ void ManejadorDeVotacion::dibujarConfirmacionDeVoto() {
   display->clearDisplay();
   
   display->drawFastHLine(25,21,40,BLACK);
-  ScreenUtils::displayText("Ha votado!", display, 1, 13, 6);
-  ScreenUtils::displayText("Deposite su", display, 1, 9, 28);
+  ScreenUtils::displayText("Ha votado!", display, 1, 13, 6, false);
+  ScreenUtils::displayText("Deposite su", display, 1, 9, 28, false);
   ScreenUtils::displayText("voto", display, 1, 30, 40);
 
-//  delay (6000);
+  delay (6000);
 
   voto = false;
 }

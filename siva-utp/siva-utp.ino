@@ -41,20 +41,9 @@ void setup() {
   // Inicializando pantallas
   ScreenUtils::configureDisplay(ADMIN_DISPLAY); // Administración
   ScreenUtils::configureDisplay(VOTING_DISPLAY);  // Votación
-
-//  // Manejador de Tareas de Administración
-//  manejadorDeAdministracion = new Admin();
-//  manejadorDeVotacion = new ManejadorDeVotacion();  
 }
 
 void loop() {  
-  // Workaround tentativo para visualizar texto en las pantallas
-//  ADMIN_DISPLAY.print("");
-//  ADMIN_DISPLAY.display();
-//
-//  VOTING_DISPLAY.print("");
-//  VOTING_DISPLAY.display();
-  
   // -----------
   // Device flow:
   // -----------
@@ -104,9 +93,13 @@ void loop() {
     }
 
     case States::SESSION_CLOSED: {
-      ScreenUtils::displayText("Sesion ", &VOTING_DISPLAY, 1);
+      VOTING_DISPLAY.clearDisplay();
+      ADMIN_DISPLAY.clearDisplay();
+      
+      ScreenUtils::displayText("Sesion ", &VOTING_DISPLAY, 1, false);
       ScreenUtils::displayText("finalizada ", &VOTING_DISPLAY, 1, 0, 10);
-      ScreenUtils::displayText("Sesion ", &ADMIN_DISPLAY, 1);
+      
+      ScreenUtils::displayText("Sesion ", &ADMIN_DISPLAY, 1, false);
       ScreenUtils::displayText("finalizada ", &ADMIN_DISPLAY, 1, 0, 10);
       
       break;
