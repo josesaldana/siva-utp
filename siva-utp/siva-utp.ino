@@ -7,26 +7,43 @@
 #include "Admin.h"
 #include "Voting.h"
 #include "Screen.h"
-
-const unsigned int IN_CONFIGURATION = 1;
-const unsigned int IN_SESSION_CLOSING = 3;
-
-unsigned int current_state = 1;
-
-Admin admin;
-
+#include "RFID.h"
+#include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 
+enum States { 
+  IN_CONFIGURATION = 1, 
+  IN_SESSION = 2, 
+  IN_SESSION_CLOSING = 3,
+  SESSION_CLOSED = 4 
+};
+
+States CURRENT_STATE = States::IN_CONFIGURATION;
+
+Adafruit_PCD8544 ADMIN_DISPLAY = Adafruit_PCD8544(12, 32, 30, 5, 28);
+Adafruit_PCD8544 VOTING_DISPLAY = Adafruit_PCD8544(13, 26, 24, 4,22);
+
+const Admin manejadorDeAdministracion(&ADMIN_DISPLAY);
+const ManejadorDeVotacion manejadorDeVotacion(&VOTING_DISPLAY);
+
 void setup() {
   Serial.begin(9600);
+  
+  SPI.begin(); 
 
-  ScreenUtils::configureDisplay(Adafruit_PCD8544(13, 26, 24, 4,22));
+  // Inicialización del uso del módulo RFID (MFRC522)
+  mfrc522.PCD_Init();
+
+  // Inicializando la impresora
+  mySerial.begin(19200);
+
+  // Inicializando pantallas
+  ScreenUtils::configureDisplay(ADMIN_DISPLAY); // Administración
+  ScreenUtils::configureDisplay(VOTING_DISPLAY);  // Votación
 }
 
-void loop()
-{
-  
+void loop() {  
   // -----------
   // Device flow:
   // -----------
@@ -47,18 +64,51 @@ void loop()
   //  4. On Voting Session Completion:
   //    4.1 Print Session status report (votes report)
 
-  switch(current_state) {
-    case IN_CONFIGURATION: {
-      admin.configurarSesion();
+  switch(CURRENT_STATE) {
+    case States::IN_CONFIGURATION: {
+      bool siguienteEstado = manejadorDeAdministracion.configurarSesion();
+      
+      if(siguienteEstado) 
+        CURRENT_STATE = States::IN_SESSION;
+      
       break;
     }
-    case IN_SESSION_CLOSING: {
-      admin.cerrarSesion();
+    
+    case States::IN_SESSION: {
+      bool siguienteEstado = manejadorDeAdministracion.enSession();
+
+      if(siguienteEstado) {
+        CURRENT_STATE = States::IN_SESSION_CLOSING;
+      } else {
+        manejadorDeVotacion.ejecutar(Session::initializeOrGet()->votos().size());
+      }
+      
       break;
     }
+    
+    case States::IN_SESSION_CLOSING: {
+      manejadorDeAdministracion.cerrarSesion();
+      CURRENT_STATE = States::SESSION_CLOSED;
+      break;
+    }
+
+    case States::SESSION_CLOSED: {
+      VOTING_DISPLAY.clearDisplay();
+      ADMIN_DISPLAY.clearDisplay();
+      
+      ScreenUtils::displayText("Sesion ", &VOTING_DISPLAY, 1, false);
+      ScreenUtils::displayText("finalizada ", &VOTING_DISPLAY, 1, 0, 10);
+      
+      ScreenUtils::displayText("Sesion ", &ADMIN_DISPLAY, 1, false);
+      ScreenUtils::displayText("finalizada ", &ADMIN_DISPLAY, 1, 0, 10);
+      
+      break;
+    }
+    
+    default: printf("Ha ocurrido un error"); // Beep!
   }
 
-  delay(100);
+  //delay(100);
 }
 
 
