@@ -21,8 +21,8 @@ using namespace std;
 
 #include "SoftwareSerial.h"
 
-#define TX_PIN 6 // Arduino transmite el Rayo Amarillo rotulado RX en la impresora
-#define RX_PIN 5 // Arduino recibe el cable verde con etiqueta TX en la impresora
+#define TX_PIN 19 // Arduino transmite el Rayo Amarillo rotulado RX en la impresora
+#define RX_PIN 18 // Arduino recibe el cable verde con etiqueta TX en la impresora
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Declarar el SoftwareSerial como objeto primeto.
 Adafruit_Thermal printer(&mySerial);     // Pasar la direccion al constructor de la impresora
@@ -61,7 +61,9 @@ class imprimirNumeros{            // Clase encargada de las impresiones de las v
     printer.doubleHeightOn();                 // Hacer que la altura del valor sea el doble
     printer.setSize('L');                     // Imprimir el valor en tamaño Large (grande) moderado
     printer.justify('C');                     // Imprimir el valor justidicado centrado
-    printer.print("Votos - Nominas");         // Impresion de encabezado
+
+    printer.println(F("\n"));
+    printer.print("Nominas Votos");         // Impresion de encabezado
     printer.println(F("\n"));                 // Salto de linea
     for (int x; x <10;x++){
      suma = suma + num[x];                    // contador para total de votos
