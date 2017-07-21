@@ -1,6 +1,3 @@
-#ifndef PRINTER_H
-#define PRINTER_H
-
 #include <ArduinoSTL.h>
 
 /*------------------------------------------------------------------------
@@ -24,8 +21,8 @@ using namespace std;
 
 #include <SoftwareSerial.h>
 
-#define TX_PIN 38 // Arduino transmite el Rayo Amarillo rotulado RX en la impresora
-#define RX_PIN 39 // Arduino recibe el cable verde con etiqueta TX en la impresora
+#define TX_PIN 19 // Arduino transmite el Rayo Amarillo rotulado RX en la impresora
+#define RX_PIN 18 // Arduino recibe el cable verde con etiqueta TX en la impresora
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Declarar el SoftwareSerial como objeto primeto.
 
@@ -94,5 +91,3 @@ class ServicioDeImpresion {            // Clase encargada de las impresiones de 
   }
     
 };
-
-#endif //PRINTER_H

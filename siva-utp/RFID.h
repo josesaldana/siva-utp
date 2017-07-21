@@ -13,9 +13,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 byte ActualUID[4]; 
 
 // Base de datos de tags válidos
-std::vector<byte> usuariosValidos({
-  { 0xB0, 0x9D, 0x12, 0x33 }
-});
+byte USUARIO_VALIDO[4] = { 0xB0, 0x9D, 0x12, 0x33 };
 
 /**
  * Función para comparar dos vectores
@@ -43,11 +41,7 @@ bool leerTag() {
         ActualUID[i] = mfrc522.uid.uidByte[i];
       }
       
-      // Comparamos los UID para determinar si es uno de nuestros usuarios
-      for(int i = 0; i < usuariosValidos.size(); i++) {
-        comparacionDeTag = compareArray(ActualUID, usuariosValidos[i]);
-        if(comparacionDeTag) break;
-      }
+      comparacionDeTag = compareArray(ActualUID, USUARIO_VALIDO);
       
       // Terminamos la lectura de la tarjeta tarjeta  actual
       mfrc522.PICC_HaltA();
